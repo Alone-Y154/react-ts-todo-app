@@ -1,0 +1,13 @@
+# for development env
+
+FROM node:alpine3.10
+
+WORKDIR /todo-app
+
+COPY ./package.json /todo-app
+
+RUN npm install
+
+COPY . /todo-app
+
+CMD [ "npm","run","dev" ]

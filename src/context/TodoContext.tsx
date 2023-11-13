@@ -1,4 +1,4 @@
-import {ReactNode, createContext , useContext, useState} from 'react';
+import {ReactNode, createContext , useContext, useRef, useState} from 'react';
 
 export type Todo = {
     id: string;
@@ -13,7 +13,10 @@ export type TodoContext = {
     handleAllClear: () => void;
     toggleTodoComplete: (todoId: string) => void;
     handleDelete: (todoId: string) => void;
-
+    handleTheme: (theme:boolean) => void;
+    handleDragStart: (index: number) => void;
+    handleDragEnter: ( index: number) => void;
+    handleDragEnd: () => void;
 }
 
 export type TodoProviderProps = {
@@ -35,22 +38,30 @@ export const Todoprovider = ({children} : TodoProviderProps) => {
         }
     })
 
-
+    const dragItem = useRef<number | null>(null)
+    const dragOverItem = useRef<number | null>(null)
+   
     const handleAddTodo = (task:string) => {
-        setTodo(prev => {
-            const newTodo:Todo[] = [
-                {
-                    id: Math.random().toString(),
-                    task: task,
-                    completed: false,
-                    createdAt: new Date()
-                },
-                ...prev
-            ]
-
-            localStorage.setItem("todo", JSON.stringify(newTodo));
-            return newTodo
-        })
+        const validation = document.getElementById("text-error") as HTMLParagraphElement;
+        if(task.length){
+            setTodo(prev => {
+                const newTodo:Todo[] = [
+                    {
+                        id: Math.random().toString(),
+                        task: task,
+                        completed: false,
+                        createdAt: new Date()
+                    },
+                    ...prev
+                ]
+                validation.innerHTML = "";
+                localStorage.setItem("todo", JSON.stringify(newTodo));
+                return newTodo
+            })
+        }else {
+            validation.innerHTML = "Please enter a task........";
+        }
+      
     }
 
     const handleAllClear = () =>  {
@@ -75,8 +86,55 @@ export const Todoprovider = ({children} : TodoProviderProps) => {
         setTodo(todo.filter(todo=> todo.id !== todoId))
         localStorage.setItem("todo", JSON.stringify(todo.filter(todo=> todo.id !== todoId)));
     }
+
+    const setDarkMode = ():void => {
+        document.body.classList.remove("light");
+        document.body.classList.add("dark");
+    }
+
+    const setLightMode = ():void => {
+        document.body.classList.add("light");
+        document.body.classList.remove("dark");
+      }
+
+    const handleTheme = (theme:boolean) => {
+        theme ? setLightMode() : setDarkMode()
+    }
+
+    const handleDragStart = (index: number) => {
+        console.log("start",index)
+        dragItem.current = index;
+    }
+
+    const handleDragEnter = (index: number) => {
+        console.log("enter",index)
+        dragOverItem.current = index;
+    }
+
+    const handleDragEnd = () => {
+    //    const drag = [...todo];
+    //    const draggedItemContent = drag.splice(dragItem.current, 1 )[0]
+    //    drag.splice(dragOverItem.current, 0, draggedItemContent);
+    //    dragItem.current = null;
+    //    dragOverItem.current = null;
+    //    setTodo(drag)
+    //    localStorage.setItem("todo", JSON.stringify(drag));
+
+    if (dragItem.current !== null && dragOverItem.current !== null) {
+        const draggedItemContent = todo[dragItem.current];
+        const newTodo = [...todo];
+        newTodo.splice(dragItem.current, 1); //removing
+        newTodo.splice(dragOverItem.current, 0, draggedItemContent); //adding
+  
+        setTodo(newTodo);
+        localStorage.setItem("todo", JSON.stringify(newTodo));
+    }
+}
+
+
+
     return(
-        <todoContext.Provider value={{todo, handleAddTodo ,handleAllClear , toggleTodoComplete, handleDelete}}>
+        <todoContext.Provider value={{todo, handleAddTodo ,handleAllClear , toggleTodoComplete, handleDelete, handleTheme, handleDragStart, handleDragEnter, handleDragEnd}}>
             {children}
         </todoContext.Provider>
     )

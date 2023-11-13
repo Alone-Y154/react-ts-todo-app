@@ -21,6 +21,6 @@ WORKDIR /usr/share/nginx/html
 
 RUN rm -rf ./*
 
-COPY --from=nodework /todo-app/build .
+COPY --from=nodework /todo-app/dist .
 
 ENTRYPOINT [ "nginx","-g","daemon off;" ]

@@ -45,7 +45,7 @@ const TodoList = () => {
             <span>
               <img src={checkbox} alt="check"/>
             </span>
-            <span className="text-[#494C6B] dark:text-[#C8CBE7] font-normal tracking-[-0.167px] md:text-lg text-xs">{todo.task}</span>
+            <span className="text-[#494C6B] dark:text-[#C8CBE7] font-normal tracking-[-0.167px] md:text-lg text-base">{todo.task}</span>
           </label>
         </div>
         {todo.completed && 
